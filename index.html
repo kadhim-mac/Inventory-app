@@ -57,16 +57,26 @@
         .divider::before, .divider::after { content: ""; flex: 1; border-bottom: 1px solid var(--border); margin: 0 8px; }
 
         /* الشاشة الرئيسية للتطبيق */
-        #app-container { display: none; width: 100%; min-height: 100vh; }
+        #app-container { display: none; width: 100%; min-height: 100vh; position: relative; }
         
-        /* القائمة الجانبية Sidebar */
+        /* القائمة الجانبية السلايدر Sidebar Slider */
         .sidebar {
-            width: 260px; background: var(--sidebar-bg); border-left: 1px solid var(--border);
+            width: 280px; background: var(--sidebar-bg); border-left: 1px solid var(--border);
             padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
-            position: fixed; height: 100vh; right: 0; top: 0; z-index: 100;
+            position: fixed; height: 100vh; right: 0; top: 0; z-index: 1000;
+            transition: transform 0.3s ease-in-out;
         }
-        .brand { font-size: 20px; font-weight: bold; color: var(--text-main); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+
+        /* طبقة التعتيم عند فتح السلايدر على الموبايل */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.6); z-index: 999; backdrop-filter: blur(2px);
+        }
+
+        .brand-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .brand { font-size: 18px; font-weight: bold; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
         .brand i { color: #f59e0b; }
+        .close-sidebar-btn { display: none; background: transparent; border: none; color: var(--text-sub); font-size: 20px; cursor: pointer; }
 
         .menu-title { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
         .category-list { list-style: none; }
@@ -79,46 +89,52 @@
         .category-item .badge { background: #334155; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
 
         /* المحتوى الرئيسي Main Content */
-        .main-content { margin-right: 260px; padding: 25px; width: calc(100% - 260px); }
+        .main-content { margin-right: 280px; padding: 20px; width: calc(100% - 280px); transition: margin-right 0.3s; }
         
         header {
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--card-dark); padding: 15px 20px; border-radius: 12px;
-            border: 1px solid var(--border); margin-bottom: 25px;
+            background: var(--card-dark); padding: 12px 20px; border-radius: 12px;
+            border: 1px solid var(--border); margin-bottom: 20px; gap: 10px; flex-wrap: wrap;
         }
-        .user-info { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-        .role-badge { background: var(--primary); padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; }
-        .btn-logout { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .header-right-group { display: flex; align-items: center; gap: 12px; }
+        .menu-toggle-btn { background: var(--card-dark); border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; display: none; }
 
-        .card { background: var(--card-dark); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 25px; }
-        .card h3 { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--accent); }
+        .user-info { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .role-badge { background: var(--primary); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+        .btn-logout { background: var(--danger); color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .card { background: var(--card-dark); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
+        .card h3 { font-size: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--accent); }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
         .form-group { display: flex; flex-direction: column; }
         label { font-size: 12px; margin-bottom: 6px; color: var(--text-sub); font-weight: bold; }
         input, select {
             padding: 10px; background: var(--bg-dark); border: 1px solid var(--border);
-            border-radius: 8px; color: #fff; outline: none; font-size: 14px;
+            border-radius: 8px; color: #fff; outline: none; font-size: 13px;
         }
 
         .btn-add { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
 
         /* الجدول Table */
-        table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13.5px; }
-        th, td { padding: 14px; border-bottom: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13px; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border); }
         th { background: #0f172a; color: var(--text-sub); font-weight: 600; }
         td { color: var(--text-main); }
 
         .admin-only { display: none; }
 
-        .btn-print { background: #334155; color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-print { background: #334155; color: #fff; border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; }
         .btn-print:hover { background: var(--primary); }
 
-        /* Responsive للموبايل */
-        @media (max-width: 768px) {
-            .sidebar { position: relative; width: 100%; height: auto; border-left: none; border-bottom: 1px solid var(--border); }
-            .main-content { margin-right: 0; width: 100%; padding: 15px; }
-            #app-container { flex-direction: column; }
+        /* التحكم بالسلايدر للموبايل responsive */
+        @media (max-width: 850px) {
+            .sidebar { transform: translateX(100%); } /* إخفاء القائمة جهة اليمين */
+            .sidebar.active { transform: translateX(0); } /* إظهار القائمة كـ السلايدر */
+            .sidebar-overlay.active { display: block; }
+            .close-sidebar-btn { display: block; }
+            .menu-toggle-btn { display: block; }
+            .main-content { margin-right: 0; width: 100%; padding: 12px; }
         }
 
         /* الطباعة */
@@ -161,12 +177,18 @@
         <svg id="label-barcode"></svg>
     </div>
 
+    <!-- خلفية تعتيم عند فتح القائمة الجانبية -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
     <!-- التطبيق الرئيسي -->
     <div id="app-container">
-        <!-- القائمة الجانبية Sidebar -->
-        <aside class="sidebar">
+        <!-- القائمة الجانبية السلايدر Slider Sidebar -->
+        <aside class="sidebar" id="sidebar">
             <div>
-                <div class="brand"><i class="fa-solid fa-bolt"></i> المخزن والباركود</div>
+                <div class="brand-header">
+                    <div class="brand"><i class="fa-solid fa-bolt"></i> المخزن والباركود</div>
+                    <button class="close-sidebar-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
                 <div class="menu-title"><i class="fa-solid fa-box-archive"></i> إدارة المخزون</div>
                 <ul class="category-list">
                     <li class="category-item active" onclick="filterCategory('all', this)">
@@ -196,10 +218,13 @@
         <!-- المنطقة الرئيسية Main Content -->
         <main class="main-content">
             <header>
-                <div class="user-info">
-                    <i class="fa-solid fa-user-circle" style="font-size:20px;"></i>
-                    <span id="user-email-display">...</span>
-                    <span id="user-role-display" class="role-badge">موظف</span>
+                <div class="header-right-group">
+                    <button class="menu-toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                    <div class="user-info">
+                        <i class="fa-solid fa-user-circle" style="font-size:18px;"></i>
+                        <span id="user-email-display">...</span>
+                        <span id="user-role-display" class="role-badge">موظف</span>
+                    </div>
                 </div>
                 <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i> خروج</button>
             </header>
@@ -307,6 +332,13 @@
         }
     });
 
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
     function loginWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider).catch(err => {
@@ -370,6 +402,9 @@
         document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         renderTable();
+        if (window.innerWidth <= 850) {
+            toggleSidebar(); // إغلاق السلايدر تلقائياً عند الاختيار على الهاتف
+        }
     }
 
     function updateCategoryCounts() {
