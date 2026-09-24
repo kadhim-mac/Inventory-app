@@ -1,0 +1,3 @@
+/* Lithium Pro print overrides */
+@page{margin:0}
+@media print{html,body{background:#fff!important}*{font-family:Arial,Tahoma,sans-serif!important}}
