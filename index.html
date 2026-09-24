@@ -1,0 +1,251 @@
+التسجيلات
+<!-- مكتبة توليد الباركود -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --bg-color: #f8fafc;
+        --border: #e2e8f0;
+        --danger: #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-color); color: #0f172a; padding: 15px; }
+
+    /* شاشة تسجيل الدخول */
+    #login-screen {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 10000;
+    }
+    .login-card {
+        background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 380px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center;
+    }
+    .login-card h2 { margin-bottom: 20px; color: #1e293b; font-size: 20px; }
+    .login-card input {
+        width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border);
+        border-radius: 8px; outline: none; font-size: 14px;
+    }
+    .login-card button {
+        width: 100%; padding: 12px; background: var(--primary); color: white; border: none;
+        border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px;
+    }
+
+    /* الصفحة الرئيسية */
+    #app-content { display: none; max-width: 1100px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
+    .btn-logout { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+    .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .form-group { display: flex; flex-direction: column; }
+    label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #64748b; }
+    input { padding: 10px; border: 1px solid var(--border); border-radius: 6px; }
+
+    .btn-add { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+
+    table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13px; margin-top: 10px; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; color: #64748b; }
+
+    .admin-only { display: none; }
+
+    /* منطقة الطباعة الخاصة بالملصق الحراري */
+    @media print {
+        body * { visibility: hidden; }
+        #label-print-area, #label-print-area * { visibility: visible; }
+        #label-print-area { 
+            position: absolute; left: 0; top: 0; width: 50mm; height: 25mm; 
+            text-align: center; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; 
+        }
+    }
+    #label-print-area { display: none; }
+</style>
+
+<!-- شاشة تسجيل الدخول -->
+<div id="login-screen">
+    <div class="login-card">
+        <h2>تسجيل الدخول للنظام</h2>
+        <input type="email" id="login-email" placeholder="البريد الإلكتروني">
+        <input type="password" id="login-pass" placeholder="كلمة المرور">
+        <button onclick="login()">دخول</button>
+        <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
+    </div>
+</div>
+
+<!-- ملصق الطباعة (يحتوي على اسم المنتج والباركود فقط) -->
+<div id="label-print-area">
+    <div id="label-product-name" style="font-size: 11px; font-weight: bold; margin-bottom: 4px;"></div>
+    <svg id="label-barcode"></svg>
+</div>
+
+<!-- محتوى النظام الرئيسي -->
+<div id="app-content">
+    <header>
+        <div>
+            <span id="user-display" style="font-weight: bold;"></span>
+        </div>
+        <button class="btn-logout" onclick="logout()">تسجيل خروج</button>
+    </header>
+
+    <!-- نموذج إضافة المادة (خاص بالمدير فقط) -->
+    <div class="card admin-only" id="admin-card">
+        <h3>➕ إضافة قطعة جديدة للمخزن (خاص بالمدير)</h3>
+        <div class="form-grid" style="margin-top:15px;">
+            <div class="form-group">
+                <label>الاسم / الموديل</label>
+                <input type="text" id="p-name" placeholder="اسم المادة">
+            </div>
+            <div class="form-group">
+                <label>سعر التكلفة (د.ع)</label>
+                <input type="number" id="p-buy" placeholder="سعر الشراء">
+            </div>
+            <div class="form-group">
+                <label>سعر البيع (د.ع)</label>
+                <input type="number" id="p-sell" placeholder="سعر البيع للزبون">
+            </div>
+            <div class="form-group">
+                <label>الكمية المتوفرة</label>
+                <input type="number" id="p-qty" placeholder="العدد">
+            </div>
+        </div>
+        <button class="btn-add" onclick="addProduct()">حفظ وإضافة للمخزن</button>
+    </div>
+
+    <!-- جدول المخزون العام -->
+    <div class="card">
+        <h3>📦 جدول المواد والمخزون</h3>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الباركود</th>
+                        <th>المادة</th>
+                        <th class="admin-only">سعر التكلفة</th>
+                        <th>سعر البيع</th>
+                        <th>الكمية</th>
+                        <th>خيارات</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-list"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+    // مفاتيح الربط الخاصة بمشروعك
+    const firebaseConfig = {
+        apiKey: "AIzaSyC-EUCB1oycVqLU_yiV5CGFRhnN4DCvRYA",
+        authDomain: "inventory-app-2cb3a.firebaseapp.com",
+        databaseURL: "https://inventory-app-2cb3a-default-rtdb.firebaseio.com",
+        projectId: "inventory-app-2cb3a",
+        storageBucket: "inventory-app-2cb3a.firebasestorage.app",
+        messagingSenderId: "901208724965",
+        appId: "1:901208724965:web:a0ccc451e454853f914b0c",
+        measurementId: "G-6XDZZMCR38"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let currentUser = null;
+
+    // متابعة تسجيل الدخول
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+
+            // قراءة صلاحية المستخدم
+            db.ref('users/' + user.uid).once('value').then(snapshot => {
+                const userData = snapshot.val();
+                const isAdmin = userData && userData.role === 'admin';
+
+                document.getElementById('user-display').innerText = `المستخدم: ${user.email} (${isAdmin ? 'مدير' : 'موظف'})`;
+
+                if (isAdmin) {
+                    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+                    document.querySelectorAll('th.admin-only, td.admin-only').forEach(el => el.style.display = 'table-cell');
+                } else {
+                    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                }
+                loadInventory();
+            });
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-content').style.display = 'none';
+        }
+    });
+
+    function login() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        auth.signInWithEmailAndPassword(email, pass).catch(err => {
+            document.getElementById('login-error').innerText = "خطأ في البيانات: " + err.message;
+        });
+    }
+
+    function logout() { auth.signOut(); }
+
+    function loadInventory() {
+        db.ref('inventory').on('value', snapshot => {
+            const tbody = document.getElementById('inventory-list');
+            tbody.innerHTML = '';
+            const data = snapshot.val();
+
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><svg id="barcode-${item.barcode}"></svg></td>
+                            <td><strong>${item.name}</strong></td>
+                            <td class="admin-only" style="color:#c2410c;">${(item.buyPrice || 0).toLocaleString()} د.ع</td>
+                            <td style="color:#059669; font-weight:bold;">${(item.sellPrice || 0).toLocaleString()} د.ع</td>
+                            <td><strong>${item.qty}</strong></td>
+                            <td><button onclick="printLabel('${item.barcode}', '${item.name}')">🏷️ طباعة ملصق</button></td>
+                        </tr>
+                    `;
+                });
+
+                setTimeout(() => {
+                    Object.keys(data).forEach(key => {
+                        JsBarcode(`#barcode-${data[key].barcode}`, data[key].barcode, {
+                            format: "CODE128", width: 1.2, height: 30, displayValue: true, fontSize: 10
+                        });
+                    });
+                }, 100);
+            }
+        });
+    }
+
+    function addProduct() {
+        const name = document.getElementById('p-name').value;
+        const buyPrice = parseFloat(document.getElementById('p-buy').value) || 0;
+        const sellPrice = parseFloat(document.getElementById('p-sell').value) || 0;
+        const qty = parseInt(document.getElementById('p-qty').value) || 0;
+        const barcode = 'INV-' + Math.floor(100000 + Math.random() * 900000);
+
+        if (!name) return alert('يرجى كتابة اسم المادة');
+
+        db.ref('inventory').push({ name, buyPrice, sellPrice, qty, barcode });
+
+        document.getElementById('p-name').value = '';
+        document.getElementById('p-buy').value = '';
+        document.getElementById('p-sell').value = '';
+        document.getElementById('p-qty').value = '';
+        alert('تمت إضافة المادة بنجاح وتوليد الباركود');
+    }
+
+    function printLabel(code, name) {
+        document.getElementById('label-product-name').innerText = name;
+        JsBarcode("#label-barcode", code, { format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 11 });
+        document.getElementById('label-print-area').style.display = 'flex';
+        window.print();
+        document.getElementById('label-print-area').style.display = 'none';
+    }
+
