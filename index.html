@@ -3,93 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة المخزون والباركود</title>
-    <!-- مكتبات Firebase SDK -->
+    <title>المخزن والباركود ⚡</title>
+    <!-- مكتبات Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
-    <!-- مكتبة توليد الباركود -->
+    <!-- مكتبة الباركود -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- FontAwesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --sidebar-bg: #0b1329;
             --primary: #2563eb;
-            --bg-color: #f8fafc;
-            --border: #e2e8f0;
+            --accent: #38bdf8;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
             --danger: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg-color); color: #0f172a; padding: 15px; }
+        body { background-color: var(--bg-dark); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
         /* شاشة تسجيل الدخول */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 10000;
+            background: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 10000;
         }
         .login-card {
-            background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 380px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center;
+            background: var(--card-dark); padding: 30px; border-radius: 16px; width: 90%; max-width: 380px;
+            border: 1px solid var(--border); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); text-align: center;
         }
-        .login-card h2 { margin-bottom: 20px; color: #1e293b; font-size: 20px; }
+        .login-card h2 { margin-bottom: 20px; color: var(--text-main); font-size: 22px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .login-card input {
             width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border);
-            border-radius: 8px; outline: none; font-size: 14px;
+            background: var(--bg-dark); color: #fff; border-radius: 8px; outline: none; font-size: 14px;
         }
         .login-card button {
             width: 100%; padding: 12px; background: var(--primary); color: white; border: none;
-            border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s;
         }
+        .login-card button:hover { opacity: 0.9; }
         
         .btn-google {
-            background: #fff !important;
-            color: #333 !important;
-            border: 1px solid #ccc !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
+            background: #fff !important; color: #333 !important; display: flex;
+            align-items: center; justify-content: center; gap: 10px; margin-top: 10px; font-weight: bold;
         }
-        .divider {
-            margin: 15px 0;
-            color: #94a3b8;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-        }
-        .divider::before, .divider::after {
-            content: ""; flex: 1; border-bottom: 1px solid #e2e8f0; margin: 0 8px;
-        }
+        .divider { margin: 15px 0; color: var(--text-sub); font-size: 12px; display: flex; align-items: center; }
+        .divider::before, .divider::after { content: ""; flex: 1; border-bottom: 1px solid var(--border); margin: 0 8px; }
 
-        /* الصفحة الرئيسية */
-        #app-content { display: none; max-width: 1100px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
-        .btn-logout { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        /* الشاشة الرئيسية للتطبيق */
+        #app-container { display: none; width: 100%; min-height: 100vh; }
+        
+        /* القائمة الجانبية Sidebar */
+        .sidebar {
+            width: 260px; background: var(--sidebar-bg); border-left: 1px solid var(--border);
+            padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
+            position: fixed; height: 100vh; right: 0; top: 0; z-index: 100;
+        }
+        .brand { font-size: 20px; font-weight: bold; color: var(--text-main); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        .brand i { color: #f59e0b; }
 
-        .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        .menu-title { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+        .category-list { list-style: none; }
+        .category-item {
+            padding: 12px 15px; border-radius: 10px; margin-bottom: 6px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center; color: var(--text-sub);
+            transition: 0.2s; font-size: 14px;
+        }
+        .category-item:hover, .category-item.active { background: #1e293b; color: var(--text-main); }
+        .category-item .badge { background: #334155; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
+
+        /* المحتوى الرئيسي Main Content */
+        .main-content { margin-right: 260px; padding: 25px; width: calc(100% - 260px); }
+        
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-dark); padding: 15px 20px; border-radius: 12px;
+            border: 1px solid var(--border); margin-bottom: 25px;
+        }
+        .user-info { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        .role-badge { background: var(--primary); padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+        .btn-logout { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        .card { background: var(--card-dark); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 25px; }
+        .card h3 { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--accent); }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .form-group { display: flex; flex-direction: column; }
-        label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #64748b; }
-        input { padding: 10px; border: 1px solid var(--border); border-radius: 6px; }
+        label { font-size: 12px; margin-bottom: 6px; color: var(--text-sub); font-weight: bold; }
+        input, select {
+            padding: 10px; background: var(--bg-dark); border: 1px solid var(--border);
+            border-radius: 8px; color: #fff; outline: none; font-size: 14px;
+        }
 
         .btn-add { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
 
-        table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13px; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid var(--border); }
-        th { background: #f8fafc; color: #64748b; }
+        /* الجدول Table */
+        table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13.5px; }
+        th, td { padding: 14px; border-bottom: 1px solid var(--border); }
+        th { background: #0f172a; color: var(--text-sub); font-weight: 600; }
+        td { color: var(--text-main); }
 
         .admin-only { display: none; }
 
-        /* منطقة الطباعة */
+        .btn-print { background: #334155; color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-print:hover { background: var(--primary); }
+
+        /* Responsive للموبايل */
+        @media (max-width: 768px) {
+            .sidebar { position: relative; width: 100%; height: auto; border-left: none; border-bottom: 1px solid var(--border); }
+            .main-content { margin-right: 0; width: 100%; padding: 15px; }
+            #app-container { flex-direction: column; }
+        }
+
+        /* الطباعة */
         @media print {
             body * { visibility: hidden; }
             #label-print-area, #label-print-area * { visibility: visible; }
             #label-print-area { 
                 position: absolute; left: 0; top: 0; width: 50mm; height: 25mm; 
                 text-align: center; display: flex; flex-direction: column; 
-                align-items: center; justify-content: center; 
+                align-items: center; justify-content: center; background: #fff; color: #000;
             }
         }
         #label-print-area { display: none; }
@@ -97,14 +136,14 @@
 </head>
 <body>
 
-    <!-- شاشة تسجيل الدخول -->
+    <!-- شاشة الدخول -->
     <div id="login-screen">
         <div class="login-card">
-            <h2>تسجيل الدخول للنظام</h2>
+            <h2><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> تسجيل الدخول</h2>
             
             <button class="btn-google" onclick="loginWithGoogle()">
                 <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.617z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-                الدخول باستخدام Google
+                الدخول بـ Google
             </button>
 
             <div class="divider">أو عبر البريد الإلكتروني</div>
@@ -112,68 +151,113 @@
             <input type="email" id="login-email" placeholder="البريد الإلكتروني">
             <input type="password" id="login-pass" placeholder="كلمة المرور">
             <button onclick="login()">دخول</button>
-            <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
+            <p id="login-error" style="color:#ef4444; font-size:12px; margin-top:10px;"></p>
         </div>
     </div>
 
     <!-- ملصق الطباعة -->
     <div id="label-print-area">
-        <div id="label-product-name" style="font-size: 11px; font-weight: bold; margin-bottom: 4px;"></div>
+        <div id="label-product-name" style="font-size: 11px; font-weight: bold; margin-bottom: 2px; color: #000;"></div>
         <svg id="label-barcode"></svg>
     </div>
 
-    <!-- محتوى النظام الرئيسي -->
-    <div id="app-content">
-        <header>
+    <!-- التطبيق الرئيسي -->
+    <div id="app-container">
+        <!-- القائمة الجانبية Sidebar -->
+        <aside class="sidebar">
             <div>
-                <span id="user-display" style="font-weight: bold;"></span>
+                <div class="brand"><i class="fa-solid fa-bolt"></i> المخزن والباركود</div>
+                <div class="menu-title"><i class="fa-solid fa-box-archive"></i> إدارة المخزون</div>
+                <ul class="category-list">
+                    <li class="category-item active" onclick="filterCategory('all', this)">
+                        <span><i class="fa-solid fa-globe"></i> جميع المواد</span>
+                        <span class="badge" id="count-all">0</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('بطاريات', this)">
+                        <span><i class="fa-solid fa-battery-full"></i> بطاريات</span>
+                        <span class="badge" id="count-battery">0</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('شواحن', this)">
+                        <span><i class="fa-solid fa-plug"></i> شواحن</span>
+                        <span class="badge" id="count-charger">0</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('DC to DC', this)">
+                        <span><i class="fa-solid fa-microchip"></i> DC to DC</span>
+                        <span class="badge" id="count-dc">0</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('ملحقات', this)">
+                        <span><i class="fa-solid fa-tools"></i> ملحقات</span>
+                        <span class="badge" id="count-acc">0</span>
+                    </li>
+                </ul>
             </div>
-            <button class="btn-logout" onclick="logout()">تسجيل خروج</button>
-        </header>
+        </aside>
 
-        <!-- نموذج إضافة المادة (خاص بالمدير) -->
-        <div class="card admin-only" id="admin-card">
-            <h3>➕ إضافة قطعة جديدة للمخزن (خاص بالمدير)</h3>
-            <div class="form-grid" style="margin-top:15px;">
-                <div class="form-group">
-                    <label>الاسم / الموديل</label>
-                    <input type="text" id="p-name" placeholder="اسم المادة">
+        <!-- المنطقة الرئيسية Main Content -->
+        <main class="main-content">
+            <header>
+                <div class="user-info">
+                    <i class="fa-solid fa-user-circle" style="font-size:20px;"></i>
+                    <span id="user-email-display">...</span>
+                    <span id="user-role-display" class="role-badge">موظف</span>
                 </div>
-                <div class="form-group">
-                    <label>سعر التكلفة (د.ع)</label>
-                    <input type="number" id="p-buy" placeholder="سعر الشراء">
-                </div>
-                <div class="form-group">
-                    <label>سعر البيع (د.ع)</label>
-                    <input type="number" id="p-sell" placeholder="سعر البيع للزبون">
-                </div>
-                <div class="form-group">
-                    <label>الكمية المتوفرة</label>
-                    <input type="number" id="p-qty" placeholder="العدد">
-                </div>
-            </div>
-            <button class="btn-add" onclick="addProduct()">حفظ وإضافة للمخزن</button>
-        </div>
+                <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i> خروج</button>
+            </header>
 
-        <!-- جدول المخزون العام -->
-        <div class="card">
-            <h3>📦 جدول المواد والمخزون</h3>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>الباركود</th>
-                            <th>المادة</th>
-                            <th class="admin-only">سعر التكلفة</th>
-                            <th>سعر البيع</th>
-                            <th>الكمية</th>
-                            <th>خيارات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventory-list"></tbody>
-                </table>
+            <!-- استمارة الإضافة (تظهر للمدير فقط) -->
+            <div class="card admin-only" id="admin-card">
+                <h3><i class="fa-solid fa-plus-circle"></i> إضافة قطعة جديدة للمخزن</h3>
+                <div class="form-grid" style="margin-top:15px;">
+                    <div class="form-group">
+                        <label>اسم المادة / الموديل</label>
+                        <input type="text" id="p-name" placeholder="مثال: بطارية 12V 100Ah">
+                    </div>
+                    <div class="form-group">
+                        <label>القسم</label>
+                        <select id="p-cat">
+                            <option value="بطاريات">بطاريات</option>
+                            <option value="شواحن">شواحن</option>
+                            <option value="DC to DC">DC to DC</option>
+                            <option value="ملحقات">ملحقات</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>سعر التكلفة (د.ع)</label>
+                        <input type="number" id="p-buy" placeholder="سعر الشراء">
+                    </div>
+                    <div class="form-group">
+                        <label>سعر البيع (د.ع)</label>
+                        <input type="number" id="p-sell" placeholder="سعر البيع للزبون">
+                    </div>
+                    <div class="form-group">
+                        <label>الكمية المتوفرة</label>
+                        <input type="number" id="p-qty" placeholder="العدد">
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addProduct()"><i class="fa-solid fa-save"></i> حفظ وإضافة للمخزن</button>
             </div>
-        </div>
+
+            <!-- جدول المواد -->
+            <div class="card">
+                <h3><i class="fa-solid fa-list"></i> قائمة المواد والمنتجات</h3>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الباركود</th>
+                                <th>المادة</th>
+                                <th>القسم</th>
+                                <th class="admin-only">التكلفة</th>
+                                <th>سعر البيع</th>
+                                <th>الكمية</th>
+                                <th>خيارات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
 
 <script>
@@ -192,16 +276,22 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
+    const adminEmails = ["kadhim.pc.88@gmail.com"];
+    let currentFilter = 'all';
+    let rawInventoryData = {};
+
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            
+            document.getElementById('app-container').style.display = 'flex';
+            document.getElementById('user-email-display').innerText = user.email;
+
             db.ref('users/' + user.uid).once('value').then(snapshot => {
                 const userData = snapshot.val();
-                const isAdmin = userData && userData.role === 'admin';
+                const isAdmin = (userData && userData.role === 'admin') || adminEmails.includes(user.email);
                 
-                document.getElementById('user-display').innerText = `المستخدم: ${user.email} (${isAdmin ? 'مدير' : 'موظف'})`;
+                document.getElementById('user-role-display').innerText = isAdmin ? 'مدير' : 'موظف';
+                document.getElementById('user-role-display').style.background = isAdmin ? '#2563eb' : '#475569';
 
                 if (isAdmin) {
                     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
@@ -213,19 +303,17 @@
             });
         } else {
             document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('app-content').style.display = 'none';
+            document.getElementById('app-container').style.display = 'none';
         }
     });
 
-    // الدخول باستخدام حساب جوجل
     function loginWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider).catch(err => {
-            document.getElementById('login-error').innerText = "خطأ في تسجيل الدخول عبر جوجل: " + err.message;
+            document.getElementById('login-error').innerText = "خطأ في تسجيل الدخول: " + err.message;
         });
     }
 
-    // الدخول التقليدي
     function login() {
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-pass').value;
@@ -238,38 +326,70 @@
 
     function loadInventory() {
         db.ref('inventory').on('value', snapshot => {
-            const tbody = document.getElementById('inventory-list');
-            tbody.innerHTML = '';
-            const data = snapshot.val();
+            rawInventoryData = snapshot.val() || {};
+            updateCategoryCounts();
+            renderTable();
+        });
+    }
 
-            if (data) {
-                Object.keys(data).forEach(key => {
-                    const item = data[key];
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><svg id="barcode-${item.barcode}"></svg></td>
-                            <td><strong>${item.name}</strong></td>
-                            <td class="admin-only" style="color:#c2410c;">${(item.buyPrice || 0).toLocaleString()} د.ع</td>
-                            <td style="color:#059669; font-weight:bold;">${(item.sellPrice || 0).toLocaleString()} د.ع</td>
-                            <td><strong>${item.qty}</strong></td>
-                            <td><button onclick="printLabel('${item.barcode}', '${item.name}')">🏷️ طباعة ملصق</button></td>
-                        </tr>
-                    `;
-                });
+    function renderTable() {
+        const tbody = document.getElementById('inventory-list');
+        tbody.innerHTML = '';
 
-                setTimeout(() => {
-                    Object.keys(data).forEach(key => {
-                        JsBarcode(`#barcode-${data[key].barcode}`, data[key].barcode, {
-                            format: "CODE128", width: 1.2, height: 30, displayValue: true, fontSize: 10
-                        });
-                    });
-                }, 100);
+        Object.keys(rawInventoryData).forEach(key => {
+            const item = rawInventoryData[key];
+            if (currentFilter === 'all' || item.category === currentFilter) {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><svg id="barcode-${item.barcode}"></svg></td>
+                        <td><strong>${item.name}</strong></td>
+                        <td><span style="background:#334155; padding:3px 8px; border-radius:6px; font-size:11px;">${item.category || 'عام'}</span></td>
+                        <td class="admin-only" style="color:#f97316;">${(item.buyPrice || 0).toLocaleString()} د.ع</td>
+                        <td style="color:#10b981; font-weight:bold;">${(item.sellPrice || 0).toLocaleString()} د.ع</td>
+                        <td><strong>${item.qty}</strong></td>
+                        <td><button class="btn-print" onclick="printLabel('${item.barcode}', '${item.name}')"><i class="fa-solid fa-print"></i> ملصق</button></td>
+                    </tr>
+                `;
             }
         });
+
+        setTimeout(() => {
+            Object.keys(rawInventoryData).forEach(key => {
+                const item = rawInventoryData[key];
+                if (document.getElementById(`barcode-${item.barcode}`)) {
+                    JsBarcode(`#barcode-${item.barcode}`, item.barcode, {
+                        format: "CODE128", width: 1.2, height: 30, displayValue: true, fontSize: 10, background: "transparent", lineColor: "#f8fafc"
+                    });
+                }
+            });
+        }, 100);
+    }
+
+    function filterCategory(cat, el) {
+        currentFilter = cat;
+        document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        renderTable();
+    }
+
+    function updateCategoryCounts() {
+        let counts = { all: 0, 'بطاريات': 0, 'شواحن': 0, 'DC to DC': 0, 'ملحقات': 0 };
+        Object.keys(rawInventoryData).forEach(key => {
+            counts.all++;
+            const cat = rawInventoryData[key].category;
+            if (counts[cat] !== undefined) counts[cat]++;
+        });
+
+        document.getElementById('count-all').innerText = counts.all;
+        document.getElementById('count-battery').innerText = counts['بطاريات'];
+        document.getElementById('count-charger').innerText = counts['شواحن'];
+        document.getElementById('count-dc').innerText = counts['DC to DC'];
+        document.getElementById('count-acc').innerText = counts['ملحقات'];
     }
 
     function addProduct() {
         const name = document.getElementById('p-name').value;
+        const category = document.getElementById('p-cat').value;
         const buyPrice = parseFloat(document.getElementById('p-buy').value) || 0;
         const sellPrice = parseFloat(document.getElementById('p-sell').value) || 0;
         const qty = parseInt(document.getElementById('p-qty').value) || 0;
@@ -277,13 +397,13 @@
 
         if (!name) return alert('يرجى كتابة اسم المادة');
 
-        db.ref('inventory').push({ name, buyPrice, sellPrice, qty, barcode });
+        db.ref('inventory').push({ name, category, buyPrice, sellPrice, qty, barcode });
         
         document.getElementById('p-name').value = '';
         document.getElementById('p-buy').value = '';
         document.getElementById('p-sell').value = '';
         document.getElementById('p-qty').value = '';
-        alert('تمت إضافة المادة بنجاح وتوليد الباركود');
+        alert('تمت إضافة المادة بنجاح');
     }
 
     function printLabel(code, name) {
