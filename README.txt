@@ -1,20 +1,10 @@
-LITHIUM PRO POS — GitHub Pages build
+Lithium Pro POS v2.3.4 FINAL SECURE
 
-رفع المشروع:
-1) فك الضغط.
-2) ارفع محتويات هذا المجلد كلها إلى جذر Repository: Inventory-app
-3) يجب أن يبقى index.html في الجذر.
-4) لا ترفع ملف ZIP نفسه.
-5) مجلد firebase ليس مطلوباً لتشغيل GitHub Pages؛ يحتوي نسخة قواعد قاعدة البيانات لتطبيقها لاحقاً من Firebase Console بعد الاختبار.
+- مخزون ببطاقات أوضح بلون أفتح قليلاً من الخلفية.
+- صلاحيات Realtime Database فعلية على الخادم.
+- تحميل البيانات حسب صلاحية المستخدم لتجنب أخطاء Permission denied.
+- حساب المدير: kadhim.pc.88@gmail.com
 
-Firebase:
-- Project: inventory-app-2cb3a
-- Database: Realtime Database
-- Super Admin: kadhim.pc.88@gmail.com
-- Google Sign-in يجب أن يبقى مفعلاً.
-- Authorized domain: kadhim-mac.github.io
-
-مهم: لا تطبق قواعد نهائية جديدة قبل اختبار تسجيل الدخول والمنتجات والمبيعات والمستخدمين على النسخة المنشورة.
-
-
-Version 2.3: detailed employee permissions and mobile-friendly POS search results.
+للتثبيت على GitHub Pages: ارفع جميع محتويات هذا المجلد إلى جذر Inventory-app.
+بعد التأكد من عمل الموقع، طبّق firebase/database.rules.json من Firebase Console.
+راجع FIREBASE_RULES_README.txt قبل النشر.
