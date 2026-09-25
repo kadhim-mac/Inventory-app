@@ -5,6 +5,22 @@
     "allowedUsers": {
       ".read": "auth != null",
       ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
+    },
+    "products": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
+    },
+    "invoices": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
+    },
+    "repairs": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
+    },
+    "inventory": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
     }
   }
 }
