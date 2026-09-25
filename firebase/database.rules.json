@@ -1,26 +1,53 @@
 {
   "rules": {
-    ".read": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'",
-    ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'",
+    ".read": false,
+    ".write": false,
+
     "allowedUsers": {
-      ".read": "auth != null",
-      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
+      ".read": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com'",
+      "$emailKey": {
+        ".read": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || $emailKey === auth.token.email.toLowerCase().replace('.', ','))",
+        ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com'"
+      }
     },
+
     "products": {
-      ".read": "auth != null",
-      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
+      ".read": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/inventoryView').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productAdd').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productEdit').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productDelete').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/barcodePrint').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/cashier').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/reports').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/products').val() === true)))",
+      "$productId": {
+        ".write": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && ((!data.exists() && newData.exists() && (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productAdd').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/products').val() === true)) || (data.exists() && !newData.exists() && (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productDelete').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/products').val() === true)) || (data.exists() && newData.exists() && (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productEdit').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/products').val() === true)))))",
+        "qty": {
+          ".write": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/cashier').val() === true && newData.isNumber() && newData.val() >= 0 && (!data.exists() || !data.isNumber() || newData.val() <= data.val())))"
+        }
+      }
     },
-    "invoices": {
-      ".read": "auth != null",
-      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
-    },
-    "repairs": {
-      ".read": "auth != null",
-      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
-    },
+
     "inventory": {
-      ".read": "auth != null",
-      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
+      ".read": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/inventoryView').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productAdd').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productEdit').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/productDelete').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/barcodePrint').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/cashier').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/reports').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/products').val() === true)))",
+      ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com'"
+    },
+
+    "invoices": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/invoices').val() === true || root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/reports').val() === true)))",
+      "$invoiceId": {
+        ".write": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/cashier').val() === true && !data.exists() && newData.exists()))"
+      }
+    },
+
+    "repairs": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/repairs').val() === true))",
+      "$repairId": {
+        ".write": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/repairs').val() === true))"
+      }
+    },
+
+    "debts": {
+      ".read": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/debts').val() === true))",
+      ".write": "auth != null && auth.token.email != null && (auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com' || (root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('active').val() === true && root.child('allowedUsers').child(auth.token.email.toLowerCase().replace('.', ',')).child('permissions/debts').val() === true))"
+    },
+
+    "settings": {
+      ".read": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com'",
+      ".write": "auth != null && auth.token.email != null && auth.token.email.toLowerCase() === 'kadhim.pc.88@gmail.com'"
     }
   }
 }
