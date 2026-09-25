@@ -166,3 +166,19 @@ input,select,textarea,button{max-width:100%}
   .inventory-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.inventory-card-grid>div{min-width:0;background:#0d1014;border:1px solid #252a31;border-radius:10px;padding:8px}.inventory-card-grid span{display:block;color:var(--muted);font-size:10px;margin-bottom:4px}.inventory-card-grid strong{display:block;font-size:12px;line-height:1.35;overflow-wrap:anywhere}.ltr-value{direction:ltr;text-align:right;font-family:Arial,Tahoma,sans-serif!important}
 }
 @media(max-width:340px){.inventory-card-grid{grid-template-columns:1fr}.inventory-card{padding:10px}}
+
+/* v2.3.3 — inventory cards on every screen; no horizontal stock table */
+#inventory .inventory-desktop{display:none!important}
+#inventory .inventory-mobile-cards.inventory-cards-always{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px;margin-top:12px}
+#inventory .inventory-card{background:linear-gradient(180deg,#15181d,#111419);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow);min-width:0}
+#inventory .inventory-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+#inventory .inventory-card-head>div{min-width:0;flex:1}
+#inventory .inventory-card-head b{display:block;font-size:14px;line-height:1.45;white-space:normal;overflow-wrap:anywhere}
+#inventory .inventory-card-head small{display:block;color:var(--muted);font-size:11px;margin-top:4px;white-space:normal}
+#inventory .inventory-stock{flex:0 0 auto;background:#15251d;color:#71d39a;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:700;white-space:nowrap}
+#inventory .inventory-stock.low{background:#2a1719;color:#f08a91}
+#inventory .inventory-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+#inventory .inventory-card-grid>div{min-width:0;background:#0d1014;border:1px solid #252a31;border-radius:10px;padding:8px}
+#inventory .inventory-card-grid span{display:block;color:var(--muted);font-size:10px;margin-bottom:4px}
+#inventory .inventory-card-grid strong{display:block;font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+@media(max-width:340px){#inventory .inventory-card-grid{grid-template-columns:1fr}}
