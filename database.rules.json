@@ -1,0 +1,10 @@
+{
+  "rules": {
+    ".read": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'",
+    ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'",
+    "allowedUsers": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email == 'kadhim.pc.88@gmail.com'"
+    }
+  }
+}
