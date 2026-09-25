@@ -15,3 +15,6 @@ Firebase:
 - Authorized domain: kadhim-mac.github.io
 
 مهم: لا تطبق قواعد نهائية جديدة قبل اختبار تسجيل الدخول والمنتجات والمبيعات والمستخدمين على النسخة المنشورة.
+
+
+Version 2.3: detailed employee permissions and mobile-friendly POS search results.
