@@ -1,0 +1,13 @@
+/* Lithium Pro print overrides */
+@page{margin:0}
+@media print{html,body{background:#fff!important}*{font-family:Arial,Tahoma,sans-serif!important}}
+@media print{
+  body > *:not(#printArea){display:none!important}
+  #printArea{display:block!important;position:absolute!important;inset:0!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important}
+  body:has(#printArea.barcode-print){width:var(--label-w)!important;height:var(--label-h)!important;overflow:visible!important}
+  #printArea.barcode-print .barcode-sheet{display:block!important;margin:0!important;padding:0!important}
+  #printArea.barcode-print .barcode-label{page-break-after:always!important;break-after:page!important;margin:0!important;color:#000!important}
+  #printArea.barcode-print .barcode-label:last-child{page-break-after:auto!important;break-after:auto!important}
+  .repair-receipt{width:210mm;min-height:297mm;padding:14mm;box-sizing:border-box;direction:rtl;font-family:Arial,Tahoma,sans-serif;color:#111}
+  .repair-head{display:flex;direction:ltr;justify-content:space-between;align-items:center;border-bottom:2px solid #b58a43;padding-bottom:5mm}.repair-head img{width:38mm;height:25mm;object-fit:contain}.repair-head h1{margin:0;font-size:24px;letter-spacing:2px}.repair-info{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin:7mm 0;padding:5mm;background:#f5f5f5}.repair-box{border:1px solid #ddd;padding:4mm;margin:4mm 0;min-height:18mm}.repair-money{display:flex;justify-content:space-between;background:#f1eadf;padding:4mm;font-weight:bold;margin-top:6mm}.repair-note{text-align:center;margin-top:12mm;color:#555}
+}
